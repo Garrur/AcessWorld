@@ -14,6 +14,7 @@ export default function HomePage() {
   const [query,     setQuery]     = useState("");
   const [result,    setResult]    = useState<AnalyzeResult | null>(null);
   const [loading,   setLoading]   = useState(false);
+  const [isLiveAnalyzing, setIsLiveAnalyzing] = useState(false);
   const [error,     setError]     = useState("");
 
   const handleImageSelected = useCallback((file: File) => {
@@ -22,19 +23,33 @@ export default function HomePage() {
     setError("");
   }, []);
 
-  const handleAnalyze = async () => {
-    if (!imageFile) { setError("Please upload or capture an image first."); return; }
-    setLoading(true);
+  const handleAnalyze = async (fileToAnalyze?: File) => {
+    const targetFile = fileToAnalyze || imageFile;
+    if (!targetFile) { setError("Please upload or capture an image first."); return; }
+    
+    const isLive = !!fileToAnalyze;
+    if (isLive) {
+      setIsLiveAnalyzing(true);
+    } else {
+      setLoading(true);
+    }
+
     setError("");
     try {
-      const res = await analyzeImage(imageFile, language, query);
+      const res = await analyzeImage(targetFile, language, query);
       setResult(res);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Something went wrong. Is the backend running?");
     } finally {
       setLoading(false);
+      setIsLiveAnalyzing(false);
     }
   };
+
+  const handleLiveFrameCaptured = useCallback((file: File) => {
+    setImageFile(file); // Optional, so the user sees the latest frame if they switch views
+    handleAnalyze(file);
+  }, [language, query]);
 
   return (
     <div className="container">
@@ -69,7 +84,11 @@ export default function HomePage() {
           <div className="card">
             <p className="section-label">📷 Scene Input</p>
             <div style={{ marginTop: 14 }}>
-              <CameraCapture onImageSelected={(f) => handleImageSelected(f)} />
+              <CameraCapture 
+                onImageSelected={(f) => handleImageSelected(f)} 
+                onLiveFrameCaptured={handleLiveFrameCaptured}
+                isLiveAnalyzing={isLiveAnalyzing}
+              />
             </div>
           </div>
 
@@ -101,15 +120,15 @@ export default function HomePage() {
           {/* Analyze Button */}
           <button
             className={`btn btn-primary ${styles.analyzeBtn}`}
-            onClick={handleAnalyze}
-            disabled={loading || !imageFile}
+            onClick={() => handleAnalyze()}
+            disabled={loading || !imageFile || isLiveAnalyzing}
             aria-label="Analyze the scene image"
             aria-busy={loading}
           >
-            {loading ? (
+            {loading || isLiveAnalyzing ? (
               <>
                 <span className={styles.spinnerInline} aria-hidden />
-                Analyzing…
+                {isLiveAnalyzing ? "Live Analyzing…" : "Analyzing…"}
               </>
             ) : (
               "🔍 Analyze Scene"

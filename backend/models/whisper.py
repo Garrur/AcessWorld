@@ -31,12 +31,17 @@ class WhisperModel:
         try:
             # Write to a temp buffer whisper can read
             audio_buffer = io.BytesIO(audio_bytes)
-            audio_array, sample_rate = sf.read(audio_buffer)
             
-            # Whisper expects mono float32 at 16 kHz
-            if audio_array.ndim > 1:
-                audio_array = audio_array.mean(axis=1)
-            audio_array = audio_array.astype(np.float32)
+            # Use pydub to decode WebM/MP3/WAV safely
+            from pydub import AudioSegment
+            audio_segment = AudioSegment.from_file(audio_buffer)
+            
+            # Whisper expects mono float32 at 16 kHz. We can let pydub handle resampling
+            audio_segment = audio_segment.set_frame_rate(16000).set_channels(1)
+            
+            # Convert to float32 numpy array normalized to [-1.0, 1.0]
+            samples = np.array(audio_segment.get_array_of_samples())
+            audio_array = samples.astype(np.float32) / 32768.0
             
             # Resample to 16kHz if needed using whisper's pad/trim
             audio_tensor = whisper.pad_or_trim(

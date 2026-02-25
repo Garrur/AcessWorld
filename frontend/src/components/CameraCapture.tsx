@@ -1,18 +1,22 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import styles from "./CameraCapture.module.css";
 
 interface CameraCaptureProps {
   onImageSelected: (file: File, previewUrl: string) => void;
+  onLiveFrameCaptured?: (file: File) => void;
+  isLiveAnalyzing?: boolean;
 }
 
-export default function CameraCapture({ onImageSelected }: CameraCaptureProps) {
+export default function CameraCapture({ onImageSelected, onLiveFrameCaptured, isLiveAnalyzing }: CameraCaptureProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cameraActive, setCameraActive] = useState(false);
+  const [liveModeActive, setLiveModeActive] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
+  const liveIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) return;
@@ -34,27 +38,25 @@ export default function CameraCapture({ onImageSelected }: CameraCaptureProps) {
     if (file) handleFile(file);
   };
 
-  // ── Live Camera ────────────────────────────────────────────────────────────
+  // Attach stream once the video element mounts
+  useEffect(() => {
+    if (cameraActive && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(e => console.error("Error playing video:", e));
+    }
+  }, [cameraActive]);
+
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-      setCameraActive(true);
+      setCameraActive(true); // This mounts the <video> element, triggering the useEffect
     } catch {
       alert("Camera access denied or unavailable.");
     }
   };
 
-  const stopCamera = () => {
-    streamRef.current?.getTracks().forEach(t => t.stop());
-    setCameraActive(false);
-  };
-
-  const captureFrame = () => {
+  const captureFrame = (silent = false) => {
     if (!videoRef.current) return;
     const canvas = document.createElement("canvas");
     canvas.width  = videoRef.current.videoWidth;
@@ -64,10 +66,39 @@ export default function CameraCapture({ onImageSelected }: CameraCaptureProps) {
       if (!blob) return;
       const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
       const url = canvas.toDataURL("image/jpeg");
-      setPreviewUrl(url);
-      onImageSelected(file, url);
-      stopCamera();
+      
+      if (silent && onLiveFrameCaptured) {
+        onLiveFrameCaptured(file);
+      } else {
+        setPreviewUrl(url);
+        onImageSelected(file, url);
+        stopCamera();
+      }
     }, "image/jpeg", 0.92);
+  };
+
+  const toggleLiveMode = () => {
+    if (liveModeActive) {
+      setLiveModeActive(false);
+      if (liveIntervalRef.current) clearInterval(liveIntervalRef.current);
+    } else {
+      setLiveModeActive(true);
+      // Immediately capture first frame, then interval
+      captureFrame(true); 
+      liveIntervalRef.current = setInterval(() => {
+        // Only capture next frame if parent is not currently analyzing
+        if (!isLiveAnalyzing) {
+            captureFrame(true);
+        }
+      }, 5000); // 5 sec fallback interval if backend responds faster than that
+    }
+  };
+
+  const stopCamera = () => {
+    streamRef.current?.getTracks().forEach(t => t.stop());
+    setCameraActive(false);
+    setLiveModeActive(false);
+    if (liveIntervalRef.current) clearInterval(liveIntervalRef.current);
   };
 
   return (
@@ -132,11 +163,21 @@ export default function CameraCapture({ onImageSelected }: CameraCaptureProps) {
           </>
         ) : (
           <>
-            <button className="btn btn-primary" onClick={captureFrame} aria-label="Capture current camera frame">
-              📸 Capture
+            {!liveModeActive && (
+              <button className="btn btn-primary" onClick={() => captureFrame(false)} aria-label="Capture single photo">
+                📸 Photograph
+              </button>
+            )}
+            
+            <button 
+              className={`btn ${liveModeActive ? "btn-danger" : "btn-secondary"}`} 
+              onClick={toggleLiveMode} 
+              aria-label="Toggle live continuous description mode"
+            >
+              {liveModeActive ? "🔴 Stop Live Mode" : "🟢 Start Live Mode"}
             </button>
             <button className="btn btn-danger" onClick={stopCamera} aria-label="Close camera">
-              ✕ Stop Camera
+              ✕ Close
             </button>
           </>
         )}

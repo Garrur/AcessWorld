@@ -1,0 +1,52 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.langBtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    cursor: pointer;
+    transition: all 0.2s var(--ease);
+    color: var(--text-secondary);
+}
+
+.langBtn:hover {
+    border-color: var(--border-bright);
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.langBtn:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 2px;
+}
+
+.active {
+    border-color: var(--teal) !important;
+    background: var(--teal-glow) !important;
+    color: var(--teal) !important;
+    box-shadow: 0 0 18px var(--teal-glow);
+}
+
+.flag {
+    font-size: 20px;
+}
+
+.name {
+    font-size: 12px;
+    font-weight: 600;
+}

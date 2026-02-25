@@ -1,0 +1,150 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.zonesRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+.zone {
+    border-radius: var(--radius-md);
+    padding: 14px 12px;
+    border: 1px solid;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: box-shadow 0.2s;
+}
+
+.zone_red {
+    background: var(--red-dim);
+    border-color: rgba(248, 113, 113, 0.4);
+}
+
+.zone_yellow {
+    background: var(--yellow-dim);
+    border-color: rgba(251, 191, 36, 0.4);
+}
+
+.zone_green {
+    background: var(--green-dim);
+    border-color: rgba(74, 222, 128, 0.4);
+}
+
+.zone_muted {
+    background: var(--bg-surface);
+    border-color: var(--border);
+}
+
+.zoneName {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.zonePercent {
+    font-size: 28px;
+    font-weight: 900;
+    font-family: 'Outfit', sans-serif;
+    line-height: 1;
+}
+
+.zone_red .zonePercent {
+    color: var(--red);
+}
+
+.zone_yellow .zonePercent {
+    color: var(--yellow);
+}
+
+.zone_green .zonePercent {
+    color: var(--green);
+}
+
+.zone_muted .zonePercent {
+    color: var(--text-muted);
+}
+
+.zoneLabel {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.zone_red .zoneLabel {
+    color: var(--red);
+}
+
+.zone_yellow .zoneLabel {
+    color: var(--yellow);
+}
+
+.zone_green .zoneLabel {
+    color: var(--green);
+}
+
+.zone_muted .zoneLabel {
+    color: var(--text-muted);
+}
+
+.progressBar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.8s var(--ease);
+}
+
+.fill_red {
+    background: var(--red);
+}
+
+.fill_yellow {
+    background: var(--yellow);
+}
+
+.fill_green {
+    background: var(--green);
+}
+
+.fill_muted {
+    background: var(--text-muted);
+}
+
+.overallWarning {
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid;
+}
+
+.safe {
+    background: var(--green-dim);
+    color: var(--green);
+    border-color: rgba(74, 222, 128, 0.4);
+}
+
+.danger {
+    background: var(--red-dim);
+    color: var(--red);
+    border-color: rgba(248, 113, 113, 0.4);
+}

@@ -1,0 +1,74 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.section {
+    animation-delay: calc(var(--i, 0) * 0.08s);
+}
+
+.description {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.7;
+    color: var(--text-primary);
+    margin-top: 8px;
+}
+
+.objectGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.objectItem {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.objectHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.objectLabel {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: capitalize;
+}
+
+.objectConf {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--teal);
+}
+
+.hazardCard {
+    border-color: rgba(248, 113, 113, 0.4) !important;
+}
+
+.hazardList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.translateHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.translatedText {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--teal-bright);
+    font-weight: 500;
+}
